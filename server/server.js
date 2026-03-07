@@ -19,7 +19,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5174", // ← add this (your frontend URL)
+    origin: "http://localhost:5173", // ← add this (your frontend URL)
     credentials: true,
   }),
 );

@@ -1,7 +1,15 @@
 // modals/UploadFamilyDocModal.jsx
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Upload, FileText, Image, File, Loader2 } from "lucide-react";
+import {
+  X,
+  Upload,
+  FileText,
+  Image,
+  File,
+  Loader2,
+  ChevronDown,
+} from "lucide-react";
 import { uploadFamilyDocument } from "../hooks/useApi";
 
 const CATEGORIES = [
@@ -24,6 +32,7 @@ const UploadFamilyDocModal = ({ familyId, onClose, onSuccess }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [categoryOpen, setCategoryOpen] = useState(false);
 
   const FileIconComp = file
     ? file.type.startsWith("image/")
@@ -83,20 +92,28 @@ const UploadFamilyDocModal = ({ familyId, onClose, onSuccess }) => {
             <X className="w-4 h-4" />
           </button>
         </div>
+
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {error && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold">
               {error}
             </div>
           )}
+
           <label className="cursor-pointer block">
             <input
               type="file"
               className="hidden"
+              title=""
+              tabIndex={-1}
               onChange={(e) => setFile(e.target.files[0])}
             />
             <div
-              className={`p-6 rounded-xl border-2 border-dashed transition-all ${file ? "border-gray-300 dark:border-white/[0.15] bg-gray-50 dark:bg-white/[0.06]" : "border-gray-200 dark:border-white/[0.1] hover:border-gray-300 dark:hover:border-white/[0.15] bg-gray-50 dark:bg-white/[0.04]"}`}
+              className={`p-6 rounded-xl border-2 border-dashed transition-all ${
+                file
+                  ? "border-gray-300 dark:border-white/[0.15] bg-gray-50 dark:bg-white/[0.06]"
+                  : "border-gray-200 dark:border-white/[0.1] hover:border-gray-300 dark:hover:border-white/[0.15] bg-gray-50 dark:bg-white/[0.04]"
+              }`}
             >
               {file ? (
                 <div className="flex items-center gap-3">
@@ -135,6 +152,7 @@ const UploadFamilyDocModal = ({ familyId, onClose, onSuccess }) => {
               )}
             </div>
           </label>
+
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
               Title *
@@ -147,6 +165,7 @@ const UploadFamilyDocModal = ({ familyId, onClose, onSuccess }) => {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300/50 dark:focus:ring-white/[0.1] focus:border-gray-300 dark:focus:border-white/[0.15] transition-all bg-gray-50 dark:bg-white/[0.06]"
             />
           </div>
+
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
               Description
@@ -161,22 +180,49 @@ const UploadFamilyDocModal = ({ familyId, onClose, onSuccess }) => {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300/50 dark:focus:ring-white/[0.1] focus:border-gray-300 dark:focus:border-white/[0.15] resize-none transition-all bg-gray-50 dark:bg-white/[0.06]"
             />
           </div>
+
+          {/* Category */}
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
               Category
             </label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-300/50 dark:focus:ring-white/[0.1] focus:border-gray-300 dark:focus:border-white/[0.15] transition-all bg-gray-50 dark:bg-white/[0.06]"
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setCategoryOpen(!categoryOpen)}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] text-sm text-gray-900 dark:text-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-gray-300/50 dark:focus:ring-white/[0.1] transition-all bg-gray-50 dark:bg-white/[0.06]"
+              >
+                <span>
+                  {CATEGORIES.find((c) => c.value === form.category)?.label}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-400 transition-transform ${categoryOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {categoryOpen && (
+                <div className="absolute z-20 w-full mt-1 rounded-xl border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[oklch(0.22_0.02_270)] shadow-lg overflow-hidden">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => {
+                        setForm({ ...form, category: c.value });
+                        setCategoryOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-sm text-left transition-colors ${
+                        form.category === c.value
+                          ? "bg-gray-100 dark:bg-white/[0.1] text-gray-900 dark:text-white font-semibold"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.06]"
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
               Tags{" "}
@@ -192,6 +238,7 @@ const UploadFamilyDocModal = ({ familyId, onClose, onSuccess }) => {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/[0.1] text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300/50 dark:focus:ring-white/[0.1] focus:border-gray-300 dark:focus:border-white/[0.15] transition-all bg-gray-50 dark:bg-white/[0.06]"
             />
           </div>
+
           <button
             type="submit"
             disabled={loading}

@@ -1,7 +1,7 @@
 // modals/UploadDocumentModal.jsx
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Upload, FileText, Image, File, Loader2 } from "lucide-react";
+import { X, Upload, FileText, Image, File, Loader2,ChevronDown } from "lucide-react";
 import { uploadDocument } from "../hooks/useApi";
 
 const CATEGORIES = [
@@ -24,6 +24,7 @@ const UploadDocumentModal = ({ onClose, onSuccess }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [categoryOpen,setCategoryOpen] = useState(false);
 
   const FileIcon = file
     ? file.type.startsWith("image/")
@@ -175,17 +176,39 @@ const UploadDocumentModal = ({ onClose, onSuccess }) => {
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">
               Category
             </label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/[0.1] text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/30 focus:border-indigo-400 dark:focus:border-indigo-500/50 transition-all bg-gray-50 dark:bg-white/[0.04]"
+            <button
+              type="button"
+              onClick={() => setCategoryOpen(!categoryOpen)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-white/[0.1] text-sm text-gray-900 dark:text-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/30 transition-all bg-gray-50 dark:bg-white/[0.04]"
             >
-              {CATEGORIES.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
+              <span>
+                {CATEGORIES.find((c) => c.value === form.category)?.label}
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {categoryOpen && (
+              <div className="mt-1 rounded-xl border border-gray-200 dark:border-white/[0.1] bg-white dark:bg-[oklch(0.22_0.02_275)] shadow-lg overflow-hidden">
+                {CATEGORIES.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => {
+                      setForm({ ...form, category: c.value });
+                      setCategoryOpen(false);
+                    }}
+                    className={`w-full px-4 py-2.5 text-sm text-left transition-colors ${
+                      form.category === c.value
+                        ? "bg-gray-100 dark:bg-white/[0.1] text-gray-900 dark:text-white font-semibold"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Tags */}
