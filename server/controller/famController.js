@@ -8,6 +8,7 @@ import {v2 as cloudinary} from 'cloudinary'
 import { sendInvitationEmail } from "../services/sendInvitationEmail.js";
 import { sendPinUpdateToAllMembers } from "../services/sendPinUpdateEmail.js";
 import { sendFamilyInfoUpdateToAllMembers } from "../services/sendFamilyInfoUpdateEmail.js";
+import { FamilyForgotPin } from "../services/ForgotPin.js";
 import { sendFamilyDeletedToAllMembers } from "../services/sendFamilyDeletedEmail.js";
 
 export const createFamily = async (req, res) => {
@@ -1012,6 +1013,111 @@ export const updateFamilyPin = async(req,res)=>{
     res.status(500).json({
       success: false,
       message:error.message,
+    });
+  }
+};
+
+// reset Pin in case admin forgets pin 
+
+export const resetFamilyPin = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { familyId } = req.params;
+    const { newPin } = req.body;
+
+    // ── Validations ──
+    if (!familyId) {
+      return res.status(400).json({
+        success: false,
+        message: "Family ID is required",
+      });
+    }
+
+    if (!newPin) {
+      return res.status(400).json({
+        success: false,
+        message: "New PIN is required",
+      });
+    }
+
+    if (newPin.length < 4 || newPin.length > 6) {
+      return res.status(400).json({
+        success: false,
+        message: "PIN must be 4-6 digits",
+      });
+    }
+
+    // ── Find family with members and admin ──
+    const family = await familyModel
+      .findById(familyId)
+      .select("+pin")
+      .populate("members.user", "name email")
+      .populate("admin", "name email");
+
+    if (!family) {
+      return res.status(404).json({
+        success: false,
+        message: "Family not found",
+      });
+    }
+
+    // ── Only admin can reset PIN ──
+    if (family.admin._id.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Only admin can reset family PIN",
+      });
+    }
+
+    // ── Hash and save new PIN ──
+    family.pin = await bcrypt.hash(newPin, 10);
+    await family.save();
+
+    // ── Prepare email data ──
+    const resetDate = new Date().toLocaleString("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const loginUrl = process.env.CLIENT_URL || "https://yourapp.com/login";
+
+    // ── Send email to ALL members via your FamilyForgotPin service ──
+    const allMembers = family.members.map((m) => m.user);
+
+    if (allMembers.length > 0) {
+      Promise.allSettled(
+        allMembers.map((member) =>
+          FamilyForgotPin(
+            family.name, // familyName
+            family.admin.name, // adminName
+            resetDate, // resetDate
+            newPin, // pin (plain text for email)
+            loginUrl, // loginUrl
+            member.email, // memberEmail
+          ),
+        ),
+      )
+        .then((results) => {
+          const failed = results.filter((r) => r.status === "rejected");
+          if (failed.length > 0) {
+            console.error(`${failed.length} email(s) failed to send`, failed);
+          } else {
+            console.log(
+              `PIN reset emails sent to ${allMembers.length} member(s)`,
+            );
+          }
+        })
+        .catch((err) => console.error("Unexpected email error:", err));
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Family PIN reset successfully",
+      membersNotified: allMembers.length,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

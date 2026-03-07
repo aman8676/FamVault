@@ -1,7 +1,7 @@
 import express from 'express'
 import { upload } from '../middlewares/multer.middleware.js'
 
-import { acceptInvitation, createFamily, deleteFamily, getMyFamilies, getMyInvitations, inviteMember, leaveFamily, rejectInvitation, removeMember, updatefamilyInfo, updateFamilyPin, updateFamilySettings, verifyFamilyPin } from '../controller/famController.js'
+import { acceptInvitation, createFamily, deleteFamily, getMyFamilies, getMyInvitations, inviteMember, leaveFamily, rejectInvitation, removeMember, updatefamilyInfo, updateFamilyPin, updateFamilySettings, verifyFamilyPin,resetFamilyPin } from '../controller/famController.js'
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const familyRouter = express.Router();
@@ -42,6 +42,9 @@ familyRouter.patch(
 
 
 familyRouter.patch("/pin/:familyId", verifyJWT, updateFamilyPin);
+
+familyRouter.put("/families/:familyId/reset-pin", verifyJWT, resetFamilyPin);
+
 
 familyRouter.delete(
   "/delete/:familyId",verifyJWT,deleteFamily

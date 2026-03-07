@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import path from "path"
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,9 +12,11 @@ cloudinary.config({
 });
 
 const uploadOnCloudinary = async (localFilePath, folderPath) => {
+   const absolutePath = path.resolve(localFilePath); 
   try {
     console.log(" Uploading to Cloudinary");
     console.log("Local path:", localFilePath);
+    console.log("Absolute path:", absolutePath);
     console.log("Folder:", folderPath);
 
     const response = await cloudinary.uploader.upload(localFilePath, {
@@ -23,16 +26,21 @@ const uploadOnCloudinary = async (localFilePath, folderPath) => {
 
     console.log(" Cloudinary response:", response.secure_url);
 
-    fs.unlinkSync(localFilePath); // cleanup
-    return response;
-  } catch (error) {
-    console.error(" Cloudinary upload error:", error);
-
-    if (localFilePath && fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath);
+      console.log(" Temp file deleted:", absolutePath);
     }
 
-    throw error; //  DO NOT REMOVE THIS
+    return response;
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath);
+      console.log(" Temp file deleted on error:", absolutePath);
+    }
+
+    throw error;
   }
 };
 
@@ -41,33 +49,25 @@ export const uploadEncryptedDocument = async (
   folderPath,
   originalName,
 ) => {
-  try {
-    console.log("Uploading encrypted document to Cloudinary");
-    console.log("Local path:", localFilePath);
-    console.log("Folder:", folderPath);
+  const absolutePath = path.resolve(localFilePath); 
 
-    const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "raw", // ← key difference from image upload
+  try {
+    const response = await cloudinary.uploader.upload(absolutePath, {
+      resource_type: "raw",
       folder: folderPath,
       public_id: `${Date.now()}_${originalName}`,
       overwrite: false,
     });
 
-    console.log("Encrypted document uploaded:", response.secure_url);
-
-    // delete encrypted temp file after successful upload
-    if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath);
     }
 
     return response;
   } catch (error) {
-    console.error("Encrypted document upload error:", error);
-
-    if (localFilePath && fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath);
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath);
     }
-
     throw error;
   }
 };

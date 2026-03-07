@@ -238,9 +238,7 @@ const HowItWorks = () => {
             }`}
           >
             Get started in{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-400">
               4 simple steps
-            </span>
           </h2>
           <p
             className={`text-lg max-w-xl mx-auto leading-relaxed font-light ${

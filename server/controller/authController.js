@@ -253,7 +253,6 @@ export const sendResetOtp = async (req, res) => {
       message: "OTP sent to your email",
     });
 
-    // ✅ SEND EMAIL IN BACKGROUND
     ResetOtpMail(email, otp).catch((err) =>
       console.error("Email error:", err.message),
     );

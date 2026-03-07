@@ -27,7 +27,7 @@ import DocumentPreviewModal from "../modals/DocumentPreviewModal";
 
 import { Users, Mail, FileText, Plus, ChevronRight } from "lucide-react";
 
-// ── Stats Card ────────────────────────────────────────────
+// Stats Card
 const StatsCard = ({ label, value, sub, icon: Icon, color, bg, darkBg }) => (
   <div className="bg-white dark:bg-white/[0.06] rounded-2xl border border-gray-100 dark:border-white/[0.08] shadow-sm p-6 flex items-center gap-5 hover:shadow-md transition-shadow">
     <div
@@ -43,7 +43,7 @@ const StatsCard = ({ label, value, sub, icon: Icon, color, bg, darkBg }) => (
   </div>
 );
 
-// ── Home View ─────────────────────────────────────────────
+// Home View
 const HomeView = ({
   user,
   families,
@@ -179,6 +179,7 @@ const HomeView = ({
                   key={f._id}
                   family={f}
                   onClick={() => navigate(`/family/${f._id}`)}
+                  isOwner={families.ownedFamilies?.some((o) => o._id === f._id)}
                 />
               ))}
           </div>
@@ -215,7 +216,7 @@ const HomeView = ({
   );
 };
 
-// ── Dashboard root ────────────────────────────────────────
+// Dashboard root
 const Dashboard = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -253,7 +254,7 @@ const Dashboard = () => {
     })();
   }, [navigate]);
 
-  // ── Fetch helpers ───────────────────────────────────────
+  // Fetch helpers 
   const fetchFamilies = async () => {
     setFamiliesLoading(true);
     try {
@@ -307,7 +308,7 @@ const Dashboard = () => {
     }
   };
 
-  // ── Loading screen ──────────────────────────────────────
+  // Loading screen
   if (loading)
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[oklch(0.14_0.03_275)] flex items-center justify-center">
