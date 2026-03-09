@@ -1164,14 +1164,28 @@ export const deleteFamily = async(req,res)=>{
       (member) => member.user._id.toString() !== userId.toString()
     );
 
-     try {
-       const folderPath = `fam_vault/families/family-${familyId}`;
-       await cloudinary.api.delete_resources_by_prefix(folderPath);
-       await cloudinary.api.delete_folder(folderPath);
-       console.log(`Family folder deleted: ${folderPath}`);
-     } catch (folderError) {
-       console.error("Error deleting family folder:", folderError);
-     }
+    try {
+      const folderPath = `fam_vault/families/family-${familyId}`;
+
+      // Step 1: Delete all resource types
+      await Promise.all([
+        cloudinary.api.delete_resources_by_prefix(folderPath, {
+          resource_type: "image",
+        }),
+        cloudinary.api.delete_resources_by_prefix(folderPath, {
+          resource_type: "video",
+        }),
+        cloudinary.api.delete_resources_by_prefix(folderPath, {
+          resource_type: "raw",
+        }),
+      ]);
+
+      await cloudinary.api.delete_folder(folderPath);
+
+      console.log(`Family folder deleted: ${folderPath}`);
+    } catch (folderError) {
+      console.error("Cloudinary deletion error:", folderError);
+    }
 
     await familyModel.findByIdAndDelete(familyId);
 

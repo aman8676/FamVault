@@ -1,7 +1,7 @@
 // modals/UploadDocumentModal.jsx
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Upload, FileText, Image, File, Loader2 } from "lucide-react";
+import { X, Upload, FileText, Image, File, Loader2,ChevronDown } from "lucide-react";
 import { uploadDocument } from "../hooks/useApi";
 
 const CATEGORIES = [
