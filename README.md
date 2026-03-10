@@ -1,7 +1,3 @@
-Sure Aman! Below is a **complete `README.md` file**.
-Just **copy everything and paste it into your `README.md`** in your FamVault repo.
-
----
 
 # 🔐 FamVault
 
@@ -192,15 +188,3 @@ Contributions are welcome!
 # 📄 License
 
 This project is licensed under the **MIT License**.
-
----
-
-💡 **Tip for you Aman:**
-Before pushing to GitHub, add this at the top of README to make it look **more professional**:
-
-```
-# FamVault 🔐
-Secure Family Document Vault with AES Encryption
-```
-
-If you want, I can also help you add **🔥 GitHub badges + screenshots + API endpoints section**, which makes your project look **like a real production SaaS project**.
