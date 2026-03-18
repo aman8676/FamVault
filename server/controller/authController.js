@@ -119,6 +119,41 @@ export const register = async (req, res) => {
   }
 };
 
+export const sendVerifyOtp = async (req, res) => {
+  const userId = req.user._id; // comes from verifyJWT middleware
+
+  try {
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    if (user.isAccountVerified) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Account already verified" });
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+    user.verifyOtp = otp;
+    user.verifyOtpExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    sendVerifyOtpMail(user.email, otp).catch((err) =>
+      console.error("Email error:", err.message),
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "OTP sent to your email" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 export const verifyAccount = async (req, res) => {
   const { otp } = req.body;

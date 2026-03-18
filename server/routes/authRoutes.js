@@ -2,7 +2,7 @@ import express from 'express';
 
 import { upload } from '../middlewares/multer.middleware.js';
 
-import { login, logout, register, sendResetOtp, verifyAccount, resetPassword, getMe } from '../controller/authController.js';
+import { login, logout, register, sendResetOtp, verifyAccount, sendVerifyOtp,resetPassword, getMe } from '../controller/authController.js';
 
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 
@@ -20,6 +20,7 @@ authRouter.post("/logout", logout);
 authRouter.post("/send-reset-otp", sendResetOtp);
 
 authRouter.post("/verify-account", verifyJWT, verifyAccount); 
+authRouter.post("/send-verify-otp", verifyJWT, sendVerifyOtp); // ✅ added this route
 
 authRouter.post("/reset-password", resetPassword);
 
