@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "https://fam-vault.vercel.app",
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
