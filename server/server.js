@@ -18,11 +18,21 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const allowedOrigins = [
+  "https://fam-vault.vercel.app",
+  "https://docvault.me",
+  "https://www.docvault.me",
+];
 
 app.use(
   cors({
-    origin: ["https://fam-vault.vercel.app",
-      "https://docvault.me"],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
     credentials: true,
   }),
 );
