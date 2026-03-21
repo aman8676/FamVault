@@ -19,6 +19,13 @@ api.interceptors.request.use(
     if (config.responseType === 'blob') {
       delete config.headers['Content-Type'];
     }
+    
+    // Attach regToken for verification endpoints
+    const regToken = localStorage.getItem("regToken");
+    if (regToken && (config.url.includes('/verify-account') || config.url.includes('/send-verify-otp'))) {
+      config.headers['Authorization'] = `Bearer ${regToken}`;
+    }
+    
     return config;
   },
   (error) => {

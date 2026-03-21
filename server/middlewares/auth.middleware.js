@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import userModel from "../Models/userModel.js"; 
+import pendingUserModel from "../Models/pendingUserModel.js"; 
 
 export const verifyJWT = async (req, res, next) => {
   try {
-    // Extract token from cookies or Authorization header
     const token =
       req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
@@ -14,16 +14,25 @@ export const verifyJWT = async (req, res, next) => {
       });
     }
 
-    // Verify token
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    console.log(" Decoded Token:", decodedToken); 
-    console.log(" Looking for user ID:", decodedToken.id); 
+    if (decodedToken.type === "pending") {
+      const pendingUser = await pendingUserModel.findById(decodedToken.id).select("+password");
 
-    // Find user and attach to request
+      if (!pendingUser) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid or expired registration token",
+        });
+      }
+
+      req.pendingUser = pendingUser;
+      req.user = null;
+      next();
+      return;
+    }
+
     const user = await userModel.findById(decodedToken.id).select("-password");
-
-     console.log(" User found:", user ? "YES" : "NO"); 
 
     if (!user) {
       return res.status(401).json({
@@ -33,6 +42,7 @@ export const verifyJWT = async (req, res, next) => {
     }
 
     req.user = user;
+    req.pendingUser = null;
     next();
   } catch (error) {
     return res.status(401).json({

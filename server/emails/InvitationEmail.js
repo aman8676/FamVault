@@ -59,7 +59,11 @@ export const InvitationEmail = (email, familyName, inviterName, familyPin) => {
 
                     <div style="background:#e8f5e9; border-left:4px solid #4caf50; padding:15px; margin:20px 0; border-radius:4px;">
                       <p style="margin:0; font-size:13px; color:#2e7d32;">
-                        <strong>Next Steps:</strong> Log in to your Fam Vault account to accept this invitation and start connecting with your family!
+                        <strong>Next Steps:</strong> 
+                        <ul style="margin:8px 0 0; padding-left:16px;">
+                          <li>If you have a Fam Vault account: Log in to accept this invitation</li>
+                          <li>If you're new: Create a free account at <a href="${process.env.CLIENT_URL || 'https://docvault.me'}">docvault.me</a> to join</li>
+                        </ul>
                       </p>
                     </div>
 

@@ -76,14 +76,19 @@ const familySchema = new mongoose.Schema({
 
       status: {
         type: String,
-        enum: ["pending", "accepted", "rejected"],
+        enum: ["pending", "accepted", "rejected", "expired"],
         default: "pending",
       },
 
-      tempPin:{
-        type:String,
-        select:false,
-      }
+      expiresAt: {
+        type: Date,
+        default: () => Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+      },
+
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
     },
   ],
 

@@ -15,11 +15,13 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (res.data.success) {
-      setToken(res.data.token);
-      setUser(res.data.user);
-      setEmail(res.data.user.email);
+      const regToken = res.data.regToken;
+      const userEmail = formData.get("email");
+      
+      localStorage.setItem("regToken", regToken);
+      localStorage.setItem("pendingEmail", userEmail);
+      setEmail(userEmail);
       setAuthStep("verify-email");
-     
     }
 
     return res.data; 
@@ -41,10 +43,27 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setEmail("");
     setAuthStep("login");
+    localStorage.removeItem("regToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("pendingEmail");
   };
 
   const verifyAccount = async (otp) => {
     const res = await api.post("/auth/verify-account", { otp });
+    
+    if (res.data.success) {
+      localStorage.removeItem("regToken");
+      localStorage.removeItem("pendingEmail");
+      
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        setToken(res.data.token);
+      }
+      if (res.data.user) {
+        setUser(res.data.user);
+      }
+    }
+    
     return res.data;
   };
 

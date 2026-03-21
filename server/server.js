@@ -22,6 +22,7 @@ const allowedOrigins = [
   "https://fam-vault.vercel.app",
   "https://docvault.me",
   "https://www.docvault.me",
+  "http://localhost:5173"
 ];
 
 app.use(

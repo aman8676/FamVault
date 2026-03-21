@@ -38,6 +38,8 @@ const VerifyPage = () => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
+  const displayEmail = email || localStorage.getItem("pendingEmail") || "";
+
   // OTP state
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
   const [otpError, setOtpError] = useState("");
@@ -262,7 +264,7 @@ const VerifyPage = () => {
               >
                 Code sent to{" "}
                 <span className="font-semibold">
-                  {email || "your email"}
+                  {displayEmail || "your email"}
                 </span>
               </p>
             </div>

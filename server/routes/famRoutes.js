@@ -3,6 +3,7 @@ import { upload } from '../middlewares/multer.middleware.js'
 
 import { acceptInvitation, createFamily, deleteFamily, getMyFamilies, getMyInvitations, inviteMember, leaveFamily, rejectInvitation, removeMember, updatefamilyInfo, updateFamilyPin, updateFamilySettings, verifyFamilyPin,resetFamilyPin } from '../controller/famController.js'
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { invitationRateLimiter } from '../middlewares/rateLimiter.middleware.js';
 
 const familyRouter = express.Router();
 
@@ -17,7 +18,7 @@ familyRouter.get("/my-families",verifyJWT,getMyFamilies)
 
 familyRouter.post("/verify-pin/:familyId",verifyJWT,verifyFamilyPin)
 
-familyRouter.post("/send-invitation/:familyId",verifyJWT,inviteMember)
+familyRouter.post("/send-invitation/:familyId", verifyJWT, invitationRateLimiter(10, 60 * 60 * 1000), inviteMember)
 
 
 familyRouter.get("/my-invitation", verifyJWT, getMyInvitations);

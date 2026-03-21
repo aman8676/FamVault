@@ -345,26 +345,36 @@ export const inviteMember = async (req, res) => {
       });
     }
 
-    // Add invitation
+    // Add invitation with expiration
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     family.invitations.push({
       email: email.toLowerCase(),
       invitedBy: userId,
       status: "pending",
+      expiresAt,
     });
 
     await family.save();
 
     //Get inviter details
-
     const inviter = await userModel.findById(userId).select("name email");
 
-    console.log(`send invitation email to ${email} for family ${family.name}`);
-
-    console.log(inviter.email,family.name,inviter.name)
-
-    // Send the plain PIN (not hashed) to the invited user
-    await sendInvitationEmail(inviter.email,family.name,email,inviter.name,familyPin)
+    // Send invitation email with error handling
+    try {
+      await sendInvitationEmail(inviter.email, family.name, email, inviter.name, familyPin);
+    } catch (emailError) {
+      // Rollback: remove the invitation if email fails
+      family.invitations = family.invitations.filter(
+        (inv) => inv.email !== email.toLowerCase()
+      );
+      await family.save();
+      
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send invitation email. Please try again.",
+      });
+    }
 
     res.status(200).json({
       success: true,
