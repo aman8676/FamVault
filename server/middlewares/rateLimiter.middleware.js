@@ -1,6 +1,6 @@
 const invitationCooldowns = new Map();
 
-export const invitationRateLimiter = (maxInvitations = 10, windowMs = 60 * 60 * 1000) => {
+export const invitationRateLimiter = (maxInvitations = 30, windowMs = 60 * 60 * 1000) => {
   return (req, res, next) => {
     const userId = req.user?._id?.toString() || req.ip;
     const now = Date.now();
