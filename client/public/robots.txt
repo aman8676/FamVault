@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /auth
+Allow: /forgot-password
+Allow: /verify
+
+Disallow: /dashboard
+Disallow: /family/
+
+Sitemap: https://docvault.me/sitemap.xml
