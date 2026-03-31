@@ -55,6 +55,9 @@ const ForgotPassword = () => {
           : "Enter your email and we'll send you a reset OTP"
       }
     >
+      <h1 className="sr-only">
+        {sent ? "Check your inbox" : "Forgot password?"}
+      </h1>
       <AnimatePresence mode="wait">
         {!sent ? (
           <motion.div
