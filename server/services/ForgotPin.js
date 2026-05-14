@@ -29,7 +29,7 @@ export const FamilyForgotPin = async (
 
     if (error) {
       console.error("Resend error:", error);
-      return;
+      throw new Error(error.message);
     }
 
     console.log("Email sent:", data);

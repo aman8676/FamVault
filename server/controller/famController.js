@@ -928,7 +928,7 @@ export const updateFamilyPin = async(req,res)=>{
   try{
     const userId = req.user._id;
     const{familyId}= req.params;
-    const {oldPin,newPin}= req.body;
+    const {currentPin,newPin}= req.body;
 
     if(!familyId){
       return res.status(400).json({
@@ -937,10 +937,10 @@ export const updateFamilyPin = async(req,res)=>{
       })
     }
 
-    if(!oldPin || !newPin){
+    if(!currentPin || !newPin){
       return res.status(400).json({
         success: false,
-        message:"Old PIN and new PIN are required"
+        message:"Current PIN and new PIN are required"
       })
     }
 
@@ -979,12 +979,12 @@ export const updateFamilyPin = async(req,res)=>{
 
     // verify old pin 
 
-    const isOldPinValid = await bcrypt.compare(oldPin, family.pin);
+    const isPinValid = await bcrypt.compare(currentPin, family.pin);
 
-    if(!isOldPinValid){
+    if(!isPinValid){
       return res.status(403).json({
         success: false,
-        message:"Old pin is incorrect"
+        message:"Current pin is incorrect"
       })
     }
 
@@ -995,23 +995,19 @@ export const updateFamilyPin = async(req,res)=>{
 
     await family.save();
 
-    // Sending PIN update email to all members (excluding admin)
-    const membersToNotify = family.members.filter(
-      (member) => member.user._id.toString() !== userId.toString()
-    );
+    // Sending PIN update email to all members (including admin)
+    const membersToNotify = [
+      ...family.members,
+      { user: { email: family.admin.email, name: family.admin.name } },
+    ];
 
     if (membersToNotify.length > 0) {
-      // Sending emails asynchronously
-      sendPinUpdateToAllMembers(
+      await sendPinUpdateToAllMembers(
         membersToNotify,
         family.name,
         family.admin.name,
         newPin
-      ).then((result) => {
-        console.log(`PIN update notification results:`, result);
-      }).catch((err) => {
-        console.error("Error sending PIN update emails:", err);
-      });
+      );
     }
 
     res.status(200).json({
@@ -1090,33 +1086,32 @@ export const resetFamilyPin = async (req, res) => {
     });
     const loginUrl = process.env.CLIENT_URL || "https://yourapp.com/login";
 
-    // ── Send email to ALL members via your FamilyForgotPin service ──
-    const allMembers = family.members.map((m) => m.user);
+    // ── Send email to ALL members (including admin) via your FamilyForgotPin service ──
+    const allMembers = [
+      ...family.members.map((m) => m.user),
+      { email: family.admin.email, name: family.admin.name },
+    ];
 
     if (allMembers.length > 0) {
-      Promise.allSettled(
+      const results = await Promise.allSettled(
         allMembers.map((member) =>
           FamilyForgotPin(
-            family.name, // familyName
-            family.admin.name, // adminName
-            resetDate, // resetDate
-            newPin, // pin (plain text for email)
-            loginUrl, // loginUrl
-            member.email, // memberEmail
+            family.name,
+            family.admin.name,
+            resetDate,
+            newPin,
+            loginUrl,
+            member.email,
           ),
         ),
-      )
-        .then((results) => {
-          const failed = results.filter((r) => r.status === "rejected");
-          if (failed.length > 0) {
-            console.error(`${failed.length} email(s) failed to send`, failed);
-          } else {
-            console.log(
-              `PIN reset emails sent to ${allMembers.length} member(s)`,
-            );
-          }
-        })
-        .catch((err) => console.error("Unexpected email error:", err));
+      );
+
+      const failed = results.filter((r) => r.status === "rejected");
+      if (failed.length > 0) {
+        console.error(`${failed.length} email(s) failed to send`);
+      } else {
+        console.log(`PIN reset emails sent to ${allMembers.length} member(s)`);
+      }
     }
 
     return res.status(200).json({
