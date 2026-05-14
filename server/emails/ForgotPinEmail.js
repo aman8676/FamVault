@@ -130,7 +130,7 @@ export const FamilyPinResetEmail = (familyName, adminName, resetDate, pin, login
                 <!-- CTA Button -->
                 <tr>
                   <td align="center" style="padding:0 40px 36px;">
-                    <a href="${loginUrl}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:14px 36px;border-radius:12px;letter-spacing:0.03em;">
+                    <a href="https://www.docvault.me" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:14px 36px;border-radius:12px;letter-spacing:0.03em;">
                       Open FamilyVault →
                     </a>
                   </td>
